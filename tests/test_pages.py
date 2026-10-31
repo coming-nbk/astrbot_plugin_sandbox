@@ -667,3 +667,20 @@ class TestTabDirection(unittest.TestCase):
     def test_pull_uses_forward_after_definition(self):
         self.assertLess(self.body.index("var forward ="), self.body.index("var pullX"))
 
+class TestCheckboxLayout(unittest.TestCase):
+    """复选项：方框在左、文字在右。label 在 DOM 里排在 input 前面，
+    不给它指定列就会掉进 18px 那一列，文字竖着排。"""
+
+    def setUp(self):
+        self.css = CSS.read_text("utf-8")
+        start = self.css.index('.field:has(> input[type="checkbox"]) {')
+        self.block = self.css[start:start + 2000]
+
+    def test_label_placed_in_second_column(self):
+        label_rule = self.block[self.block.index("> label {"):]
+        self.assertIn("grid-column: 2", label_rule[:300])
+
+    def test_input_placed_in_first_column(self):
+        input_rule = self.block[self.block.index('> input[type="checkbox"] {'):]
+        self.assertIn("grid-column: 1", input_rule[:300])
+

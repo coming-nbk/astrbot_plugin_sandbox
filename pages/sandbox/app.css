@@ -1311,7 +1311,11 @@ summary {
   min-height: 48px;
 }
 
+/* DOM 里 label 在前、input 在后，所以两个都要显式定位，
+   否则 label 会掉进 18px 那一列，一个字一行竖着排 */
 .field:has(> input[type="checkbox"]) > input[type="checkbox"] {
+  grid-column: 1;
+  grid-row: 1;
   width: 18px;
   height: 18px;
   margin: 0;
@@ -1319,6 +1323,8 @@ summary {
 }
 
 .field:has(> input[type="checkbox"]) > label {
+  grid-column: 2;
+  grid-row: 1;
   font-size: 14px;
   line-height: 20px;
   font-weight: 400;
@@ -1328,6 +1334,7 @@ summary {
 
 .field:has(> input[type="checkbox"]) > .hint {
   grid-column: 2;
+  grid-row: 2;
 }
 
 /* ==========================================================================
