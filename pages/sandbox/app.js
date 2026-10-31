@@ -665,6 +665,11 @@
     cancelLeave(next);
     if (current === next) { return; }
 
+    // 抽卡片的方向：往后翻从右边来，往回翻从左边来
+    var pullX = (forward ? 1 : -1) * Math.max(28, Math.min(56, Math.round(window.innerWidth * 0.07)));
+    next.style.setProperty("--pull-x", pullX + "px");
+    next.style.setProperty("--pull-r", (forward ? 1.2 : -1.2) + "deg");
+
     function reveal() {
       TAB_ORDER.forEach(function (key) {
         var tab = $("tab-" + key);
@@ -681,7 +686,13 @@
 
       moveIndicator(name);
 
-      // 新卡从 0 展开到内容高度，展开完把高度交还给内容
+      // 抽卡：从侧面滑进来（一次性，不叠加别的动画）
+      next.classList.remove("pulling");
+      void next.offsetWidth;
+      next.classList.add("pulling");
+      window.setTimeout(function () { next.classList.remove("pulling"); }, 360);
+
+      // 新卡从「空卡」高度展开到内容高度，展开完把高度交还给内容
       var target = contentHeight(next);
       var floor = minCardHeight();
       next.style.height = floor + "px";

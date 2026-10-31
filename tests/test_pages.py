@@ -598,9 +598,13 @@ class TestDeckAnimation(unittest.TestCase):
         self.assertNotIn(".deck.animating", self.css)
 
     def test_single_motion(self):
-        """卡片入场不再自带 keyframes 动画，避免和高度动画叠着跑。"""
-        self.assertNotIn("animation: card-pull", self.css)
-        self.assertNotIn("animation: card-sink", self.css)
+        """抽卡只在 .pulling 上触发，基础 .panel 不许挂常驻动画。"""
+        # card-pull 只能出现一次，而且是在 .pulling 那条规则里
+        self.assertEqual(self.css.count("animation: card-pull"), 1)
+        pull_at = self.css.index(".panel.pulling {")
+        anim_at = self.css.index("animation: card-pull")
+        self.assertGreater(anim_at, pull_at)
+        self.assertNotIn("card-sink", self.css)
 
     def test_first_visit_language_picker(self):
         self.assertIn("function showLanguagePicker", self.js)
@@ -609,4 +613,41 @@ class TestDeckAnimation(unittest.TestCase):
     def test_tour_only_once(self):
         self.assertIn("UI.tour_seen", self.js)
         self.assertNotIn('storageGet("sandbox-tour-done")', self.js)
+
+class TestSplashIcon(unittest.TestCase):
+    """启动画面用插件自己的图标，不是一块渐变。"""
+
+    def setUp(self):
+        self.html = INNER.read_text("utf-8")
+        self.css = CSS.read_text("utf-8")
+
+    def test_uses_real_logo(self):
+        self.assertIn('class="splash-mark" src="logo.png"', self.html)
+
+    def test_no_gradient_placeholder(self):
+        self.assertNotIn("linear-gradient(140deg, var(--md-primary)", self.css)
+
+    def test_logo_file_present(self):
+        from pathlib import Path as _P
+
+        self.assertTrue((_P(INNER).parent / "logo.png").is_file())
+
+
+class TestCardPull(unittest.TestCase):
+    """切页要有抽卡的手感：新卡从侧面滑进来。"""
+
+    def setUp(self):
+        self.js = JS.read_text("utf-8")
+        self.css = CSS.read_text("utf-8")
+
+    def test_keyframes_exist(self):
+        self.assertIn(".panel.pulling {", self.css)
+        self.assertIn("@keyframes card-pull", self.css)
+
+    def test_direction_follows_tab_order(self):
+        self.assertIn("--pull-x", self.js)
+        self.assertIn("--pull-r", self.js)
+
+    def test_class_is_cleared(self):
+        self.assertIn('next.classList.remove("pulling")', self.js)
 

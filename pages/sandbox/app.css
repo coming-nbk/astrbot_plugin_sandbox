@@ -342,6 +342,23 @@ main {
   overflow: hidden;
 }
 
+/* 新卡从侧面被抽出来：位移 + 轻微旋转，和高度展开一起走 */
+.panel.pulling {
+  animation: card-pull 320ms var(--md-ease-emphasized);
+}
+
+@keyframes card-pull {
+  0% {
+    transform: translateX(var(--pull-x, 40px)) rotate(var(--pull-r, 1.2deg)) scale(0.985);
+    opacity: 0.55;
+  }
+  55% { opacity: 1; }
+  100% {
+    transform: none;
+    opacity: 1;
+  }
+}
+
 .card,
 .block {
   background: var(--md-surface);
@@ -1862,13 +1879,14 @@ table.csv td { font-variant-numeric: tabular-nums; }
   text-align: center;
 }
 
-/* 一个方块标记，进场时自己转一下 */
+/* 插件自己的图标，进场时弹一下 */
 .splash-mark {
-  width: 56px;
-  height: 56px;
-  border-radius: 16px;
-  background: linear-gradient(140deg, var(--md-primary), #7c4dff);
-  box-shadow: 0 8px 24px color-mix(in srgb, var(--md-primary) 35%, transparent);
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
+  object-fit: contain;
+  background: var(--md-surface-container-high);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--md-primary) 28%, transparent);
   animation: splash-mark-in 620ms var(--md-ease-emphasized) both;
 }
 
