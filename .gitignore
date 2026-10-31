@@ -19,3 +19,6 @@ rootfs/
 .DS_Store
 .idea/
 .vscode/
+
+# 测试缓存
+.testcache
