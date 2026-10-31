@@ -651,3 +651,19 @@ class TestCardPull(unittest.TestCase):
     def test_class_is_cleared(self):
         self.assertIn('next.classList.remove("pulling")', self.js)
 
+class TestTabDirection(unittest.TestCase):
+    """switchTab 里用到的变量必须真的定义过 —— forward 漏定义过一次，切页直接抛错。"""
+
+    def setUp(self):
+        self.js = JS.read_text("utf-8")
+        start = self.js.index("function switchTab(name) {")
+        rest = self.js[start + 10:]
+        end = rest.index("\n  function ")
+        self.body = self.js[start:start + 10 + end]
+
+    def test_forward_is_defined(self):
+        self.assertIn("var forward =", self.body)
+
+    def test_pull_uses_forward_after_definition(self):
+        self.assertLess(self.body.index("var forward ="), self.body.index("var pullX"))
+

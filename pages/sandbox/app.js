@@ -687,7 +687,11 @@
     cancelLeave(next);
     if (current === next) { return; }
 
-    // 抽卡片的方向：往后翻从右边来，往回翻从左边来
+    // 方向：往后翻从右边来，往回翻从左边来
+    var fromIndex = current ? TAB_ORDER.indexOf(current.id.replace("panel-", "")) : -1;
+    var toIndex = TAB_ORDER.indexOf(name);
+    var forward = fromIndex < 0 ? true : toIndex >= fromIndex;
+
     var pullX = (forward ? 1 : -1) * Math.max(28, Math.min(56, Math.round(window.innerWidth * 0.07)));
     next.style.setProperty("--pull-x", pullX + "px");
     next.style.setProperty("--pull-r", (forward ? 1.2 : -1.2) + "deg");
