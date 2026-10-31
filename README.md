@@ -6,7 +6,7 @@
 
 **给 AstrBot 一个能跑命令的独立沙盒，宿主上的文件可以拖进去操作。**
 
-<img alt="version" src="https://img.shields.io/badge/version-1.0.0-blue?style=flat-square">
+<img alt="version" src="https://img.shields.io/badge/version-1.0.1-blue?style=flat-square">
 <img alt="platform" src="https://img.shields.io/badge/platform-aiocqhttp%20%7C%20telegram%20%7C%20discord%20%7C%20kook-2ea44f?style=flat-square">
 <img alt="license" src="https://img.shields.io/badge/license-AGPL--3.0-red?style=flat-square">
 <img alt="python" src="https://img.shields.io/badge/python-3.10%2B-3776ab?style=flat-square">

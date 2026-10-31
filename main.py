@@ -195,7 +195,7 @@ def _resolve_data_dir() -> Path:
     "astrbot_plugin_sandbox",
     "maid",
     "给 bot 一个能跑命令的独立沙盒：宿主机文件可导入、按用户/群授权、页面里管文件与执行",
-    "1.0.0",
+    "1.0.1",
 )
 class SandboxPlugin(Star):
     def __init__(self, context: Context, config: Any = None):

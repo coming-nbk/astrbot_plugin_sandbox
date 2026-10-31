@@ -1,7 +1,7 @@
 name: astrbot_plugin_sandbox
 display_name: 沙盒终端
 desc: 给 bot 一个隔离沙盒：按用户/群授权执行命令、导入宿主文件、WebUI 管文件、带安全体检与 CVE 巡检
-version: v1.0.0
+version: v1.0.1
 author: maid
 license: AGPL-3.0
 # 只声明「命令 + 文件导出」都靠得住的适配器。

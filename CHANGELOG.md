@@ -1,5 +1,19 @@
 # 更新日志
 
+## 1.0.1
+
+修上架审核卡住的那一条。
+
+### 修复
+
+- `last_bootstrap.json` 写在 AstrBot 的 `data/` 根目录，而读取方从 `plugin_data/` 读，
+  写读路径不一致，界面上的「最近一次 rootfs 安装」永远是空的。现在统一写到
+  `base_dir`（默认 `plugin_data/astrbot_plugin_sandbox/`，管理员自定义 `sandbox_root` 也跟着走）
+
+### 变更
+
+- 版本号从 1.0.0 改为 1.0.1：插件市场不允许重复使用已提交过的版本号
+
 ## 1.0.0
 
 第一个正式版。之前 1.x 的编号是内部迭代，全部按 beta 处理，不单独列。

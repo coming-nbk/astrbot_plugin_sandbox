@@ -6,7 +6,7 @@
 
 **A disposable Linux sandbox for AstrBot — run commands, move files in and out.**
 
-<img alt="version" src="https://img.shields.io/badge/version-1.0.0-blue?style=flat-square">
+<img alt="version" src="https://img.shields.io/badge/version-1.0.1-blue?style=flat-square">
 <img alt="platform" src="https://img.shields.io/badge/platform-aiocqhttp%20%7C%20telegram%20%7C%20discord%20%7C%20kook-2ea44f?style=flat-square">
 <img alt="license" src="https://img.shields.io/badge/license-AGPL--3.0-red?style=flat-square">
 <img alt="python" src="https://img.shields.io/badge/python-3.10%2B-3776ab?style=flat-square">
@@ -55,7 +55,7 @@ imported first and the new `main.py` ends up paired with the old `sandboxkit`.
 
 ```bash
 # unzip into data/plugins/ and restart AstrBot
-unzip astrbot_plugin_sandbox-v1.0.0.zip -d data/plugins/
+unzip astrbot_plugin_sandbox-v1.0.1.zip -d data/plugins/
 
 # or let the script find AstrBot itself
 python3 install.py --astrbot /opt/AstrBot
