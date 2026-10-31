@@ -12,5 +12,8 @@ support_platforms:
   - telegram
   - discord
   - kook
+# 用到的都是 4.x 才有的接口：astrbot.api.web 的 request/json_response、
+# filter.llm_tool、window.AstrBotPluginView 桥接
+astrbot_version: ">=4.0.0"
 repo: https://github.com/coming-nbk/astrbot_plugin_sandbox
 logo: logo.png

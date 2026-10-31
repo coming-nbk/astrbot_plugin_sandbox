@@ -44,3 +44,17 @@ class TestMetadata(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+class TestAstrBotVersion(unittest.TestCase):
+    """必须声明能跑在哪些 AstrBot 版本上，否则市场里显示「-」。"""
+
+    def setUp(self):
+        self.text = META.read_text("utf-8")
+
+    def test_declared(self):
+        self.assertIn("astrbot_version:", self.text)
+
+    def test_is_a_range(self):
+        line = [l for l in self.text.splitlines() if l.startswith("astrbot_version:")][0]
+        self.assertRegex(line, r">=\s*4\.\d+")
+
