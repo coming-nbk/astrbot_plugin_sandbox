@@ -681,7 +681,7 @@ Copyright (C) 2026 maid
 AstrBot 控制台 → 插件管理 → 从链接安装 → 填：
 
 ```
-https://github.com/<你的用户名>/astrbot_plugin_sandbox
+https://github.com/coming-nbk/astrbot_plugin_sandbox
 ```
 
 **装法二：上传 zip**
