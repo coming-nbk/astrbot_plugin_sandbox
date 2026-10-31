@@ -779,7 +779,7 @@
   });
 
   document.querySelectorAll(".tab").forEach(function (tab) {
-    tab.addEventListener("click", function () {
+    tab.addEventListener("click", safe("切换标签", function () {
       switchTab(tab.dataset.tab);
       if (tab.dataset.tab === "logs") { loadLogs(); }
       if (tab.dataset.tab === "rules") { loadRules(); }
@@ -787,7 +787,7 @@
       if (tab.dataset.tab === "config") { loadConfig(); }
       if (tab.dataset.tab === "files") { openFilesTab(); }
       if (tab.dataset.tab === "security") { loadSecurity(); }
-    });
+    }));
   });
 
   // ---------- 概览 ----------
@@ -953,6 +953,8 @@
     tour.index = index;
     var step = TOUR_STEPS[index];
     var target = document.querySelector(step.sel);
+    // 面板还没渲染出来时 querySelector 是 null，跳过这一步而不是抛错
+    if (!target) { return tourShow(index + 1); }
 
     if (!tour.mask) {
       tour.mask = el("div", { class: "tour-mask" });
@@ -2729,7 +2731,7 @@
     splashHint("正在读取权限…");
     finishBoot();
     if (!UI.tour_seen) {
-      window.setTimeout(function () { tourShow(0); }, 900);
+      window.setTimeout(safe("引导", function () { tourShow(0); }), 900);
     }
   });
 
@@ -2744,12 +2746,12 @@
 
   function startAutoRefresh() {
     if (autoTimer) { return; }
-    autoTimer = window.setInterval(function () {
+    autoTimer = window.setInterval(safe("自动刷新", function () {
       if (document.hidden) { return; }
       var tab = currentTab();
       if (tab === "overview") { loadOverview(); }
       if (tab === "setup" && !taskRunning) { loadSetup(false); }
       if (tab === "logs") { loadLogs(); }
-    }, 10000);
+    }), 10000);
   }
 })();
