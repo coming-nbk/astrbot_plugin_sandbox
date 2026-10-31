@@ -1238,23 +1238,28 @@ summary {
    ========================================================================== */
 
 /* ==========================================================================
-   设置页表单：标签在上、输入在中间、说明在下
-   之前用的是「标签浮到边框上」的填充式输入框，标签和说明挤在同一个框里，
-   看着乱；改成常规堆叠，一行一个意思。
+   设置页表单 —— 单列，按 MD3 的字段规格来
+   label-large 12/16、outlined 输入框 56dp、supporting text 12/16、间距 20dp
    ========================================================================== */
+
+#config-form .form-grid {
+  grid-template-columns: 1fr;
+  gap: 20px;
+  max-width: 640px;
+}
 
 .field {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  margin-bottom: 0;
+  gap: 4px;
+  margin: 0;
 }
 
 .field > label {
   font-size: 12px;
   line-height: 16px;
   font-weight: 500;
-  letter-spacing: 0.2px;
+  letter-spacing: 0.4px;
   color: var(--md-on-surface-variant);
   margin: 0;
 }
@@ -1262,13 +1267,22 @@ summary {
 .field > input[type="text"],
 .field > input[type="number"],
 .field > select {
-  height: 44px;
-  padding: 0 12px;
+  width: 100%;
+  height: 56px;
+  padding: 0 16px;
   border: 1px solid var(--md-outline);
-  border-radius: var(--md-shape-sm);
-  background: var(--md-surface-container-lowest);
-  font-size: 14px;
+  border-radius: var(--md-shape-xs);
+  background: transparent;
+  font-family: inherit;
+  font-size: 16px;
+  line-height: 24px;
   color: var(--md-on-surface);
+}
+
+.field > input[type="text"]:hover,
+.field > input[type="number"]:hover,
+.field > select:hover {
+  border-color: var(--md-on-surface);
 }
 
 .field > input[type="text"]:focus,
@@ -1279,6 +1293,7 @@ summary {
   box-shadow: inset 0 0 0 1px var(--md-primary);
 }
 
+/* 说明文字：supporting text */
 .field > .hint {
   margin: 0;
   font-size: 12px;
@@ -1286,28 +1301,33 @@ summary {
   color: var(--md-on-surface-variant);
 }
 
-/* 复选项：框和文字同一行，说明在下面 */
+/* 复选项：48dp 触摸区，框在左、文字在右，说明单独一行 */
 .field:has(> input[type="checkbox"]) {
   display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 4px 8px;
+  grid-template-columns: 18px 1fr;
+  column-gap: 12px;
+  row-gap: 2px;
   align-items: center;
+  min-height: 48px;
+}
+
+.field:has(> input[type="checkbox"]) > input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--md-primary);
 }
 
 .field:has(> input[type="checkbox"]) > label {
   font-size: 14px;
+  line-height: 20px;
+  font-weight: 400;
+  letter-spacing: 0.2px;
   color: var(--md-on-surface);
-  grid-column: 2;
 }
 
 .field:has(> input[type="checkbox"]) > .hint {
   grid-column: 2;
-}
-
-/* 设置页字段多，最多两列 */
-#config-form .form-grid {
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
-  gap: var(--sp-4) var(--sp-4);
 }
 
 /* ==========================================================================
@@ -2079,18 +2099,29 @@ html.ready main {
 
 /* 设置页分组小标题 */
 .config-group {
-  margin: var(--sp-4) 0 var(--sp-2);
-  padding-left: 10px;
-  border-left: 3px solid var(--md-primary);
-  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 32px 0 16px;
+  padding: 0;
+  font-size: 14px;
   line-height: 20px;
   font-weight: 500;
+  letter-spacing: 0.1px;
   color: var(--md-on-surface);
 }
-.config-group:first-child { margin-top: 0; }
 
-/* 设置页字段多，两列就够；四列会把提示文字挤成一条 */
-#config-form .form-grid { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+/* 分组前面一根 3dp 的竖条，比加粗标题轻 */
+.config-group::before {
+  content: "";
+  width: 3px;
+  height: 16px;
+  border-radius: 2px;
+  background: var(--md-primary);
+}
+
+#config-form .config-group:first-child { margin-top: 0; }
+.config-group:first-child { margin-top: 0; }
 
 /* 首次进入的语言选择 */
 .lang-scrim {
