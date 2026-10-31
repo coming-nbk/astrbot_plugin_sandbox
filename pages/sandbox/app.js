@@ -489,6 +489,21 @@
   }
 
   // 没有超时的 Promise 会让按钮永远「没反应」，必须兜住
+  // 包一层：哪个渲染函数炸了，页面上直接说得出名字
+  function safe(name, fn) {
+    return function () {
+      try {
+        return fn.apply(this, arguments);
+      } catch (error) {
+        var detail = (error && error.message) || String(error);
+        bootStatus(name + " 渲染失败：" + detail, true);
+        toast(name + " 渲染失败：" + detail, "error");
+        console.error("[sandbox] " + name, error);
+        return undefined;
+      }
+    };
+  }
+
   function withTimeout(promise, ms, label) {
     return new Promise(function (resolve, reject) {
       var done = false;
@@ -515,7 +530,14 @@
     options = options || {};
     var endpoint = String(path || "").replace(/^\/+/, "");
     bumpInflight(1);
-    var settled = withTimeout(rawApi(endpoint, options), options.timeout || 20000, endpoint);
+    var pending;
+    try {
+      pending = rawApi(endpoint, options);
+    } catch (error) {
+      bumpInflight(-1);
+      return Promise.reject(error);
+    }
+    var settled = withTimeout(pending, options.timeout || 20000, endpoint);
     settled.then(function () { bumpInflight(-1); }, function () { bumpInflight(-1); });
     return settled;
   }
@@ -736,8 +758,18 @@
 
   window.addEventListener("error", function (event) {
     var message = (event && event.message) || "未知错误";
-    bootStatus("脚本出错：" + message, true);
+    var where = "";
+    if (event && event.filename) {
+      where = " @ " + String(event.filename).split("/").pop() +
+        ":" + (event.lineno || 0) + ":" + (event.colno || 0);
+    }
+    // 浏览器对跨域脚本只给 "Script error."，看不到堆栈
+    if (message === "Script error." || message === "Script error") {
+      message = "脚本抛错但被跨域遮蔽（Script error），请在浏览器控制台看堆栈";
+    }
+    bootStatus("脚本出错：" + message + where, true);
     toast("页面脚本出错：" + message, "error");
+    console.error("[sandbox] " + message + where);
   });
   window.addEventListener("unhandledrejection", function (event) {
     var reason = event && event.reason;
@@ -869,7 +901,7 @@
     }
 
     renderMetrics(data.metrics);
-    renderSecurityNotice(data.security_summary);
+    safe("安全提示", renderSecurityNotice)(data.security_summary);
     renderBootstrapNotice(data.bootstrap);
 
     var detail = $("overview-detail");
@@ -1589,7 +1621,7 @@
 
   function loadUsers() {
     return api("/users").then(function (data) {
-      renderUsers(data);
+      safe("权限", renderUsers)(data);
       return data;
     }).catch(function (error) { toast(error.message, "error"); });
   }
@@ -2641,7 +2673,7 @@
   // ---------- 启动 ----------
 
   function loadOverview() {
-    return api("/overview").then(renderOverview).catch(function (error) {
+    return api("/overview").then(safe("概览", renderOverview)).catch(function (error) {
       $("backend-meta").textContent = error.message;
     });
   }
