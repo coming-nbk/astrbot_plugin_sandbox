@@ -1,4 +1,4 @@
-# Copyright (C) 2026 maid
+# Copyright (C) 2026 coming-nbk
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 """插件冒烟测试：把 main.py 真正 import 进来跑一遍。

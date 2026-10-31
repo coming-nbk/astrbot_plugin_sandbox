@@ -1,4 +1,4 @@
-# Copyright (C) 2026 maid
+# Copyright (C) 2026 coming-nbk
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 """WebUI 用的文件视图：目录树、预览、保存、删除。

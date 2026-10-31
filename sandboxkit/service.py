@@ -1,4 +1,4 @@
-# Copyright (C) 2026 maid
+# Copyright (C) 2026 coming-nbk
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 """沙盒服务层：把「一句话」翻译成「一次受限执行」。

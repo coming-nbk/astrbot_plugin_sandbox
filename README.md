@@ -19,7 +19,7 @@
 > **本插件以 GNU Affero General Public License v3.0（AGPL-3.0）发布。**
 > 你可以自由使用、修改、分发；如果你修改后把它作为网络服务对外提供，
 > 必须同样以 AGPL-3.0 公开你修改后的源码。
-> 完整条款见 [LICENSE](LICENSE)，版权归 Copyright (C) 2026 maid。
+> 完整条款见 [LICENSE](LICENSE)，版权归 Copyright (C) 2026 coming-nbk。
 
 ---
 
@@ -645,7 +645,7 @@ python3 -m unittest discover -s tests -t .
 
 简单说：可以改、可以自己用、可以分发，但**如果你把它改成一个对外提供的网络服务，必须公开你改过的源码**。这是 AGPL 和 GPL 的唯一区别，也是选它的原因 —— 免得有人拿这套东西做个闭源沙盒平台卖钱。
 
-Copyright (C) 2026 maid
+Copyright (C) 2026 coming-nbk
 
 ---
 

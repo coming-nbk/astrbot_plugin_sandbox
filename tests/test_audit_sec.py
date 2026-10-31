@@ -1,4 +1,4 @@
-# Copyright (C) 2026 maid
+# Copyright (C) 2026 coming-nbk
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 """安全体检：本地检查要能抓出真问题，外部漏洞源要能容错。"""

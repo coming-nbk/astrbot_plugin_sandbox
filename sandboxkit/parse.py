@@ -1,4 +1,4 @@
-# Copyright (C) 2026 maid
+# Copyright (C) 2026 coming-nbk
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 """把聊天消息拆成子命令和参数。

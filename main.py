@@ -1,9 +1,9 @@
-# Copyright (C) 2026 maid
+# Copyright (C) 2026 coming-nbk
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 """AstrBot 沙盒插件入口。
 
-Copyright (C) 2026 maid
+Copyright (C) 2026 coming-nbk
 
 This program is free software: you can redistribute it and/or modify it under
 the terms of the GNU Affero General Public License as published by the Free
@@ -193,7 +193,7 @@ def _resolve_data_dir() -> Path:
 
 @register(
     "astrbot_plugin_sandbox",
-    "maid",
+    "coming-nbk",
     "给 bot 一个能跑命令的独立沙盒：宿主机文件可导入、按用户/群授权、页面里管文件与执行",
     "1.0.1",
 )

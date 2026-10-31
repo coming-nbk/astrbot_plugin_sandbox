@@ -19,7 +19,7 @@
 > **Released under the GNU Affero General Public License v3.0 (AGPL-3.0).**
 > You may use, modify and redistribute it freely; if you run a modified version as a
 > network service, you must publish the modified source under the same license.
-> Full terms in [LICENSE](LICENSE). Copyright (C) 2026 maid.
+> Full terms in [LICENSE](LICENSE). Copyright (C) 2026 coming-nbk.
 
 ---
 

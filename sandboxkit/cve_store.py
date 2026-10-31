@@ -1,4 +1,4 @@
-# Copyright (C) 2026 maid
+# Copyright (C) 2026 coming-nbk
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 """本地 CVE 知识库：AI 搜到什么、判断什么，都可以记进来，后面按内核版本自动匹配。

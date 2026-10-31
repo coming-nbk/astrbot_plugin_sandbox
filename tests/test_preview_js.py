@@ -1,4 +1,4 @@
-# Copyright (C) 2026 maid
+# Copyright (C) 2026 coming-nbk
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 """预览渲染器的真机测试：把 app.js 里的纯函数抽出来丢给 node 跑。

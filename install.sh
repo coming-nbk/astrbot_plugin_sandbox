@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright (C) 2026 maid
+# Copyright (C) 2026 coming-nbk
 # SPDX-License-Identifier: AGPL-3.0-or-later
 # 一键安装包装：真正的逻辑在 install.py，这里只负责找到 python3。
 # 用法：./install.sh /opt/AstrBot         或   ASTRBOT_ROOT=/opt/AstrBot ./install.sh

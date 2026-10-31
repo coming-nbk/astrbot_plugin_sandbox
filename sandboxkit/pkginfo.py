@@ -1,4 +1,4 @@
-# Copyright (C) 2026 maid
+# Copyright (C) 2026 coming-nbk
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
 """读 rootfs 里装了哪些包、什么版本，用来判断「升级完到底修没修」。
