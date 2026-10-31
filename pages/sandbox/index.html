@@ -1,0 +1,532 @@
+<!doctype html>
+<!--
+  astrbot_plugin_sandbox — Copyright (C) 2026 maid
+  SPDX-License-Identifier: AGPL-3.0-or-later
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>沙盒控制台</title>
+<link rel="stylesheet" href="./app.css">
+</head>
+<body>
+<div class="progress" id="progress" hidden></div>
+<div class="splash" id="boot-splash" role="status" aria-live="polite">
+  <div class="splash-inner">
+    <div class="splash-mark" aria-hidden="true"></div>
+    <div class="splash-title">沙盒控制台</div>
+    <div class="splash-bar" aria-hidden="true"></div>
+    <div class="splash-hint" id="splash-hint">正在连接 AstrBot…</div>
+  </div>
+</div>
+
+<header class="hero">
+  <div class="hero-main">
+    <div class="hero-title">
+      <span class="status-dot" id="status-dot"></span>
+      <h1>沙盒控制台</h1>
+    </div>
+    <p class="hero-sub" id="backend-meta">正在读取状态</p>
+    <p class="hero-status" id="boot-status">脚本未运行</p>
+  </div>
+  <div class="hero-actions">
+    <button class="btn ghost" id="tour-start" type="button">引导</button>
+    <button class="btn tonal" id="refresh" type="button">刷新状态</button>
+  </div>
+</header>
+
+<nav class="tabs" role="tablist" aria-label="控制台分区">
+  <span class="tab-indicator" id="tab-indicator" aria-hidden="true"></span>
+  <button class="tab" role="tab" id="tab-overview"
+          aria-controls="panel-overview" aria-selected="true"
+          data-tab="overview">概览</button>
+  <button class="tab" role="tab" id="tab-config"
+          aria-controls="panel-config" aria-selected="false"
+          data-tab="config">设置</button>
+  <button class="tab" role="tab" id="tab-setup"
+          aria-controls="panel-setup" aria-selected="false"
+          data-tab="setup">部署</button>
+  <button class="tab" role="tab" id="tab-users"
+          aria-controls="panel-users" aria-selected="false"
+          data-tab="users">权限</button>
+  <button class="tab" role="tab" id="tab-files"
+          aria-controls="panel-files" aria-selected="false"
+          data-tab="files">文件</button>
+  <button class="tab" role="tab" id="tab-exec"
+          aria-controls="panel-exec" aria-selected="false"
+          data-tab="exec">执行</button>
+  <button class="tab" role="tab" id="tab-rules"
+          aria-controls="panel-rules" aria-selected="false"
+          data-tab="rules">规则</button>
+  <button class="tab" role="tab" id="tab-logs"
+          aria-controls="panel-logs" aria-selected="false"
+          data-tab="logs">日志</button>
+        <button class="tab" id="tab-security" role="tab" aria-controls="panel-security"
+          aria-selected="false"
+          data-tab="security">安全</button>
+</nav>
+
+<noscript>
+  <div class="card" style="margin:24px">这个页面需要 JavaScript。如果浏览器禁用了脚本，或者页面被嵌在禁止脚本的 iframe 里，就会看到现在这样：所有按钮都没反应。</div>
+</noscript>
+
+<main>
+  <div class="deck" id="deck">
+  <section class="panel" id="panel-overview" role="tabpanel" aria-labelledby="tab-overview">
+    <div class="section-head">
+      <h2>概览</h2>
+      <p class="section-desc">后端状态、配额与宿主资源</p>
+    </div>
+
+    <div class="panel-body">
+    <div class="status-bar">
+      <div class="status-main">
+        <span class="status-dot" id="ov-dot"></span>
+        <div>
+          <div class="status-title" id="ov-backend">—</div>
+          <div class="status-sub" id="ov-rootfs">正在读取</div>
+        </div>
+      </div>
+      <div class="chips" id="ov-chips"></div>
+    </div>
+
+    <div class="stat-strip" id="overview-stats"></div>
+
+    <div class="two-col">
+      <section class="block">
+        <h3 class="block-title">宿主资源</h3>
+        <div class="meters" id="overview-metrics"></div>
+      </section>
+      <section class="block">
+        <h3 class="block-title">运行信息</h3>
+        <dl class="kv" id="overview-detail"></dl>
+      </section>
+    </div>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-config" role="tabpanel" aria-labelledby="tab-config" hidden>
+    <div class="section-head">
+      <h2>设置</h2>
+      <p class="section-desc">改完点保存，立即生效。标「需重启」的项要重启容器。</p>
+    </div>
+
+    <div class="panel-body">
+      <section class="block">
+        <div class="block-head">
+          <div>
+            <h3 class="block-title">插件配置</h3>
+            <p class="block-desc">这些值来自插件配置文件，保存后直接写回并热更新。</p>
+            <p class="hint" id="config-path"></p>
+          </div>
+          <button class="btn primary" type="button" id="config-save">保存设置</button>
+        </div>
+        <div id="config-form" class="stack"></div>
+      </section>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-setup" role="tabpanel" aria-labelledby="tab-setup" hidden>
+    <div class="section-head">
+      <h2>部署</h2>
+      <p class="section-desc">检查这台机器能跑哪种隔离、下 rootfs、给指定用户开权限。只改插件自己的文件。</p>
+    </div>
+
+    <div class="panel-body">
+      <section class="block">
+        <div class="block-head">
+          <div>
+            <h3 class="block-title">环境</h3>
+            <p class="block-desc">先跑环境自检，再选套餐下 rootfs。换套餐会替换 rootfs：会话文件保留，但发行版会变。</p>
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="field">
+            <label for="setup-profile">rootfs 套餐</label>
+            <select id="setup-profile">
+              <option value="">读取中…</option>
+            </select>
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn" type="button" id="setup-probe">环境自检</button>
+          <button class="btn" type="button" id="setup-test">快速自检</button>
+          <button class="btn ghost" type="button" id="setup-test-deep">深度自检</button>
+          <button class="btn ghost" type="button" id="setup-diag">诊断连接</button>
+          <button class="btn" type="button" id="setup-sources">检测下载源</button>
+          <button class="btn primary" type="button" id="setup-rootfs">下载 rootfs</button>
+          <button class="btn" type="button" id="setup-audit">安全体检</button>
+          <button class="btn ghost" type="button" id="setup-harden">清 setuid</button>
+        </div>
+        <div id="setup-advice" class="stack mt-4"></div>
+      </section>
+
+      <section class="block">
+        <div class="block-head">
+          <div>
+            <h3 class="block-title">一键授权</h3>
+            <p class="block-desc">写进 permissions.json，立刻生效。配额填 0 表示跟随全局。</p>
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="field">
+            <label for="setup-user">用户 ID</label>
+            <input id="setup-user" type="text" placeholder="用户 ID">
+          </div>
+          <div class="field">
+            <label for="setup-quota">配额（MB，0 = 全局）</label>
+            <input id="setup-quota" type="number" min="0" step="1" value="0">
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn primary" type="button" id="setup-apply">授权并使用</button>
+        </div>
+      </section>
+
+      <section class="block">
+        <div class="block-head">
+          <div>
+            <h3 class="block-title">安装软件包</h3>
+            <p class="block-desc">沙盒里的进程是 nobody，apt 自己装不了。这里由插件以 root 装进 rootfs，会影响所有用户。</p>
+          </div>
+        </div>
+        <div class="form-grid">
+          <div class="field">
+            <label for="pkg-names">包名（空格分隔）</label>
+            <input id="pkg-names" type="text" placeholder="ffmpeg sqlite3 tree">
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn" type="button" id="pkg-install">安装</button>
+        </div>
+      </section>
+
+      <section class="block">
+        <h3 class="block-title">输出</h3>
+        <pre class="out" id="setup-out"></pre>
+      </section>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-users" role="tabpanel" aria-labelledby="tab-users" hidden>
+    <div class="section-head">
+      <h2>权限</h2>
+      <p class="section-desc">谁能用沙盒、能用多少。留空的配额与超时跟随全局默认值。</p>
+    </div>
+
+    <div class="panel-body">
+      <section class="block">
+        <div class="block-head">
+          <div>
+            <h3 class="block-title">添加或修改用户</h3>
+            <p class="block-desc">保存后立即生效，不需要重启。</p>
+          </div>
+        </div>
+        <form id="user-form">
+          <div class="form-grid">
+            <div class="field">
+              <label for="u-id">用户 ID</label>
+              <input id="u-id" type="text" required placeholder="平台上的用户 ID">
+            </div>
+            <div class="field">
+              <label for="u-note">备注</label>
+              <input id="u-note" type="text" placeholder="可选">
+            </div>
+            <div class="field">
+              <label for="u-quota">配额（MB，0 = 跟随全局）</label>
+              <input id="u-quota" type="number" min="0" step="1" value="0">
+            </div>
+            <div class="field">
+              <label for="u-timeout">超时（秒，0 = 跟随全局）</label>
+              <input id="u-timeout" type="number" min="0" max="3600" step="1" value="0">
+            </div>
+            <div class="field">
+              <label for="u-network">联网</label>
+              <select id="u-network">
+                <option value="">跟随全局</option>
+                <option value="true">允许</option>
+                <option value="false">禁止</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="u-import">宿主导入</label>
+              <select id="u-import">
+                <option value="">跟随全局</option>
+                <option value="true">允许</option>
+                <option value="false">禁止</option>
+              </select>
+            </div>
+            <div class="field field-wide">
+              <label>沙盒内权限</label>
+              <div class="checkline">
+                <label><input type="checkbox" id="u-exec" checked>执行命令</label>
+                <label><input type="checkbox" id="u-py" checked>运行 Python</label>
+                <label><input type="checkbox" id="u-export" checked>导出文件</label>
+                <label><input type="checkbox" id="u-reset" checked>重置沙盒</label>
+              </div>
+            </div>
+            <div class="field">
+              <label for="u-enabled">状态</label>
+              <select id="u-enabled">
+                <option value="true">启用</option>
+                <option value="false">停用</option>
+              </select>
+            </div>
+          </div>
+          <div class="actions">
+            <button class="btn primary" type="submit">保存用户</button>
+            <button class="btn ghost" type="button" id="user-reset">清空表单</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="block">
+        <h3 class="block-title">已授权用户</h3>
+        <div id="users-table"></div>
+      </section>
+
+      <section class="block">
+        <h3 class="block-title">全局白名单</h3>
+        <p class="block-desc">来自插件配置，这里只读。</p>
+        <div id="users-global" class="stack mt-3"></div>
+      </section>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-rules" role="tabpanel" aria-labelledby="tab-rules" hidden>
+    <div class="section-head">
+      <h2>规则</h2>
+      <p class="section-desc">信任命令跳过看门狗，场景规则决定「哪些环境下谁能用」。</p>
+    </div>
+
+    <div class="panel-body">
+      <section class="block">
+        <div class="block-head">
+          <div>
+            <h3 class="block-title">信任命令</h3>
+            <p class="block-desc">命中的命令跳过内存和 CPU 看门狗，可单独放宽超时。通配符按整条命令匹配，例如 make *。信任等于放弃这层保护。</p>
+          </div>
+        </div>
+        <form id="trust-form">
+          <div class="form-grid">
+            <div class="field">
+              <label for="t-pattern">命令通配符</label>
+              <input id="t-pattern" type="text" required placeholder="make *">
+            </div>
+            <div class="field">
+              <label for="t-note">备注</label>
+              <input id="t-note" type="text" placeholder="可选">
+            </div>
+            <div class="field">
+              <label for="t-timeout">超时覆盖（秒，0 = 跟随全局）</label>
+              <input id="t-timeout" type="number" min="0" max="3600" step="1" value="0">
+            </div>
+            <div class="field field-wide">
+              <div class="checkline">
+                <label><input type="checkbox" id="t-mem" checked>跳过内存看门狗</label>
+                <label><input type="checkbox" id="t-cpu" checked>跳过 CPU 看门狗</label>
+                <label><input type="checkbox" id="t-enabled" checked>启用</label>
+              </div>
+            </div>
+          </div>
+          <div class="actions">
+            <button class="btn primary" type="submit">保存信任规则</button>
+          </div>
+        </form>
+        <div id="trust-table" class="mt-4"></div>
+      </section>
+
+      <section class="block">
+        <div class="block-head">
+          <div>
+            <h3 class="block-title">场景规则</h3>
+            <p class="block-desc">优先级：单用户权限 &gt; 指定群号 &gt; 群 * &gt; 私聊 &gt; 全部。用户列表留空表示该场景所有人。</p>
+          </div>
+        </div>
+        <form id="scope-form">
+          <div class="form-grid">
+            <div class="field">
+              <label for="s-scope">场景</label>
+              <select id="s-scope">
+                <option value="group">群聊</option>
+                <option value="private">私聊</option>
+                <option value="all">全部</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="s-target">目标（群号或 *）</label>
+              <input id="s-target" type="text" placeholder="*">
+            </div>
+            <div class="field">
+              <label for="s-allow">结果</label>
+              <select id="s-allow">
+                <option value="true">允许</option>
+                <option value="false">禁止</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="s-users">限定用户（逗号分隔，留空=所有人）</label>
+              <input id="s-users" type="text" placeholder="123456">
+            </div>
+            <div class="field">
+              <label for="s-note">备注</label>
+              <input id="s-note" type="text" placeholder="可选">
+            </div>
+          </div>
+          <div class="actions">
+            <button class="btn primary" type="submit">保存场景规则</button>
+          </div>
+        </form>
+        <div id="scope-table" class="mt-4"></div>
+      </section>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-logs" role="tabpanel" aria-labelledby="tab-logs" hidden>
+    <div class="section-head">
+      <h2>日志</h2>
+      <p class="section-desc">按天切文件，超过保留天数自动删除。这里只显示最近的一个文件。</p>
+    </div>
+
+    <div class="panel-body">
+      <section class="block">
+        <div class="block-head">
+          <div>
+            <h3 class="block-title">运行日志</h3>
+          </div>
+          <div class="actions" style="margin-top:0">
+            <button class="btn" type="button" id="log-refresh">刷新</button>
+            <button class="btn ghost" type="button" id="log-cleanup">立即清理</button>
+          </div>
+        </div>
+        <pre class="out" id="log-view"></pre>
+      </section>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-security" role="tabpanel" aria-labelledby="tab-security" hidden>
+    <div class="section-head">
+      <h2>安全</h2>
+      <p class="section-desc">风险清单。能一键修的直接修，改不了的写清楚要动哪里。</p>
+    </div>
+    <div class="panel-body">
+      <section class="block">
+        <div class="block-head">
+          <div>
+            <h3 class="block-title">风险</h3>
+            <p class="block-desc" id="sec-host"></p>
+          </div>
+          <div class="actions" style="margin-top:0">
+            <button class="btn" type="button" id="sec-scan">重新扫描</button>
+            <button class="btn ghost" type="button" id="sec-upgrade">升级沙盒包</button>
+          </div>
+        </div>
+        <div id="sec-list" class="stack"></div>
+        <pre class="out" id="sec-out" hidden></pre>
+      </section>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-files" role="tabpanel" aria-labelledby="tab-files" hidden>
+    <div class="section-head">
+      <h2>文件</h2>
+      <p class="section-desc">浏览、预览、下载、删除沙盒里的文件。改完记得保存。</p>
+    </div>
+
+    <div class="panel-body">
+      <section class="block">
+        <div class="form-grid">
+          <div class="field">
+            <label for="f-user">用户</label>
+            <select id="f-user"></select>
+          </div>
+          <div class="field">
+            <label for="f-path">路径</label>
+            <input id="f-path" type="text" value=".">
+          </div>
+        </div>
+        <div class="actions">
+          <button class="btn" type="button" id="f-up">上级</button>
+          <button class="btn primary" type="button" id="f-load">打开</button>
+        </div>
+      </section>
+
+      <div class="split">
+        <section class="block">
+          <div class="block-head">
+            <h3 class="block-title">文件树</h3>
+            <span class="hint" id="tree-summary"></span>
+          </div>
+          <div class="tree" id="tree"></div>
+        </section>
+
+        <section class="block">
+          <div class="block-head">
+            <h3 class="block-title" id="preview-title">预览</h3>
+            <div class="actions" style="margin-top:0">
+              <button class="btn sm" type="button" id="preview-download" hidden>下载</button>
+              <button class="btn sm ghost" type="button" id="preview-copy" hidden>复制宿主路径</button>
+              <button class="btn sm ghost" type="button" id="preview-edit" hidden>源码</button>
+              <button class="btn sm" type="button" id="preview-save" hidden>保存文件</button>
+              <button class="btn sm danger" type="button" id="preview-delete" hidden>删除</button>
+            </div>
+          </div>
+          <div id="preview-body">
+            <p class="empty">在左边选一个文件。</p>
+          </div>
+        </section>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="panel-exec" role="tabpanel" aria-labelledby="tab-exec" hidden>
+    <div class="section-head">
+      <h2>执行</h2>
+      <p class="section-desc">跑在该用户自己的沙盒里，受配额、超时和输出上限约束。</p>
+    </div>
+
+    <div class="panel-body">
+      <section class="block">
+        <div class="form-grid">
+          <div class="field">
+            <label for="e-user">用户</label>
+            <input id="e-user" type="text" placeholder="谁的沙盒" list="user-options-2">
+            <datalist id="user-options-2"></datalist>
+          </div>
+        </div>
+        <div class="field">
+          <label for="e-cmd">命令</label>
+          <textarea id="e-cmd" rows="4" placeholder="ls -la"></textarea>
+        </div>
+        <div class="actions">
+          <button class="btn primary" type="button" id="e-run">执行</button>
+        </div>
+        <div id="e-out" class="mt-4"></div>
+      </section>
+    </div>
+  </section>
+  </div>
+</main>
+
+<div class="modal-scrim" id="modal" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <h2 id="modal-title"></h2>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-gate" id="modal-gate" hidden>
+      <label for="modal-gate-input">请输入下面这个词确认</label>
+      <input id="modal-gate-input" type="text" autocomplete="off" spellcheck="false">
+    </div>
+    <div class="modal-actions">
+      <button class="btn ghost" type="button" id="modal-cancel">取消</button>
+      <button class="btn primary" type="button" id="modal-ok">确定</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script src="/api/plugin/page/bridge-sdk.js" onerror="window.__bridgeSdkFailed = true"></script>
+<script src="./app.js"></script>
+</body>
+</html>

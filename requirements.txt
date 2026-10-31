@@ -1,0 +1,2 @@
+# 本插件只依赖标准库。
+# rootfs 用的是 Alpine minirootfs 压缩包，由插件在首次启动时下载解压。

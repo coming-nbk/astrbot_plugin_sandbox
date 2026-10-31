@@ -1,0 +1,491 @@
+{
+  "enabled": {
+    "description": "总开关",
+    "type": "bool",
+    "default": true,
+    "hint": "关掉后所有人都会收到「功能已关闭」"
+  },
+  "backend": {
+    "description": "隔离后端",
+    "type": "string",
+    "options": [
+      "auto",
+      "bwrap",
+      "chroot",
+      "proot",
+      "docker",
+      "local"
+    ],
+    "default": "auto",
+    "hint": "auto 依次尝试 bwrap -> chroot -> proot -> docker -> local；local 不隔离文件系统"
+  },
+  "sandbox_root": {
+    "description": "沙盒根目录",
+    "type": "string",
+    "default": "",
+    "hint": "留空则用 AstrBot 数据目录/plugin_data/astrbot_plugin_sandbox"
+  },
+  "allow_all": {
+    "description": "允许所有人使用",
+    "type": "bool",
+    "default": false,
+    "hint": "开启后 allowed_users / allowed_groups 失效"
+  },
+  "allowed_users": {
+    "description": "允许使用的用户 ID",
+    "type": "list",
+    "default": [],
+    "hint": "每行一个用户 ID。QQ、Telegram、飞书都是各自的 ID 格式，照平台实际值填"
+  },
+  "allowed_groups": {
+    "description": "允许使用的群 ID",
+    "type": "list",
+    "default": [],
+    "hint": "群内所有人都能用，慎用"
+  },
+  "admin_users": {
+    "description": "管理员用户 ID",
+    "type": "list",
+    "default": [],
+    "hint": "管理员可以用 /sbx bootstrap 重建 rootfs"
+  },
+  "allow_import": {
+    "description": "允许把宿主文件导入沙盒",
+    "type": "bool",
+    "default": true
+  },
+  "import_roots": {
+    "description": "允许导入的宿主目录",
+    "type": "list",
+    "default": [],
+    "hint": "留空则只允许 AstrBot 数据目录；填绝对路径，每行一个"
+  },
+  "import_deny_globs": {
+    "description": "导入时拒绝的文件名",
+    "type": "list",
+    "default": [
+      ".env",
+      ".env.*",
+      "*.pem",
+      "*.key",
+      "*.p12",
+      "*.pfx",
+      "id_rsa*",
+      "id_ed25519*",
+      "*.kdbx",
+      "shadow",
+      "gshadow"
+    ],
+    "hint": "按文件名或相对路径做通配匹配"
+  },
+  "import_max_bytes": {
+    "description": "单个文件导入/导出上限（字节）",
+    "type": "int",
+    "default": 8388608,
+    "hint": "0 表示不限，不建议"
+  },
+  "import_allow_dirs": {
+    "description": "允许导入目录",
+    "type": "bool",
+    "default": false
+  },
+  "import_max_files": {
+    "description": "单次导入目录的文件数上限",
+    "type": "int",
+    "default": 2000,
+    "hint": "0 表示不限；防止一次拷进来十万个文件"
+  },
+  "quota_bytes": {
+    "description": "每个用户沙盒的配额（字节）",
+    "type": "int",
+    "default": 268435456
+  },
+  "quota_check_seconds": {
+    "description": "配额检查间隔（秒）",
+    "type": "int",
+    "default": 30,
+    "hint": "扫描目录有成本，这个间隔内复用上次结果；0 表示每次都扫"
+  },
+  "timeout_seconds": {
+    "description": "单条命令超时（秒）",
+    "type": "int",
+    "default": 30
+  },
+  "max_output_bytes": {
+    "description": "stdout / stderr 各自的上限（字节）",
+    "type": "int",
+    "default": 32768
+  },
+  "memory_mb": {
+    "description": "内存上限（MB，RLIMIT_AS）",
+    "type": "int",
+    "default": 512
+  },
+  "cpu_seconds": {
+    "description": "CPU 时间上限（秒，RLIMIT_CPU）",
+    "type": "int",
+    "default": 30
+  },
+  "max_procs": {
+    "description": "进程数上限（RLIMIT_NPROC）",
+    "type": "int",
+    "default": 0,
+    "hint": "0 表示不限制；RLIMIT_NPROC 按 uid 统计，共享主机上开了容易把宿主进程一起算进去"
+  },
+  "max_cores": {
+    "description": "CPU 核数上限",
+    "type": "int",
+    "default": 0,
+    "hint": "0 表示不限；>0 时用亲和性把命令限制在前 N 个核上"
+  },
+  "memory_watchdog": {
+    "description": "内存看门狗",
+    "type": "bool",
+    "default": true,
+    "hint": "按进程组统计 RSS，超过 memory_mb 就整组 SIGKILL；RLIMIT_AS 管不到 fork 出来的子进程"
+  },
+  "cpu_percent_limit": {
+    "description": "死循环判定阈值（单核百分比）",
+    "type": "int",
+    "default": 95,
+    "hint": "进程组 CPU 占用持续超过这个值就算死循环；0 关闭"
+  },
+  "cpu_burst_seconds": {
+    "description": "持续超限多少秒才杀",
+    "type": "int",
+    "default": 5,
+    "hint": "太短会误杀编译、解压这类正常的高 CPU 命令"
+  },
+  "allow_local_backend": {
+    "description": "允许在 local 后端下执行命令",
+    "type": "bool",
+    "default": false,
+    "hint": "关闭时（默认）没有隔离后端就拒绝执行命令，避免把宿主 shell 交出去"
+  },
+  "worker_isolation": {
+    "description": "执行放进独立进程",
+    "type": "bool",
+    "default": true,
+    "hint": "命令在单独的 worker 进程里跑，worker 崩了不会带走 AstrBot；关掉则回到同进程"
+  },
+  "worker_fallback": {
+    "description": "worker 起不来时回落到同进程",
+    "type": "bool",
+    "default": true,
+    "hint": "关掉更安全但沙盒会直接不可用"
+  },
+  "max_runs_per_minute": {
+    "description": "每人每分钟最多执行次数",
+    "type": "int",
+    "default": 20,
+    "hint": "0 表示不限；滑动窗口"
+  },
+  "max_concurrent_runs": {
+    "description": "全局并发执行上限",
+    "type": "int",
+    "default": 4,
+    "hint": "满了直接拒绝，不排队"
+  },
+  "allow_network": {
+    "description": "允许沙盒联网",
+    "type": "bool",
+    "default": false,
+    "hint": "仅 bwrap / docker 能真正切断网络"
+  },
+  "rootfs_profile": {
+    "description": "rootfs 套餐",
+    "type": "string",
+    "options": [
+      "minimal",
+      "standard",
+      "full"
+    ],
+    "default": "standard",
+    "hint": "minimal=Alpine 20MB；standard=Debian slim + 常用工具 180MB；full=Debian + 编译链/Node/SQLite 700MB"
+  },
+  "rootfs_preset": {
+    "description": "rootfs 预置",
+    "type": "string",
+    "options": [
+      "ubuntu",
+      "debian",
+      "alpine",
+      "custom"
+    ],
+    "default": "ubuntu",
+    "hint": "ubuntu 走官方索引，最稳；debian 依赖第三方产物，可能 404；alpine 只有 busybox；custom 只按 rootfs_url 下载"
+  },
+  "rootfs_version": {
+    "description": "minirootfs 版本",
+    "type": "string",
+    "default": "",
+    "hint": "留空用预置默认版本（debian=bookworm，ubuntu=24.04，alpine=3.20.3）"
+  },
+  "rootfs_url": {
+    "description": "自定义 rootfs 下载地址",
+    "type": "string",
+    "default": "",
+    "hint": "填了就用它，忽略预置；可以指向内网镜像或自己打的 rootfs.tar"
+  },
+  "rootfs_image": {
+    "description": "从 docker 镜像导出 rootfs",
+    "type": "string",
+    "default": "",
+    "hint": "填镜像名（如 alpine:3.20）就用 docker export 从本地镜像取，不依赖外网；优先级最高"
+  },
+  "rootfs_sha256": {
+    "description": "rootfs 压缩包 sha256",
+    "type": "string",
+    "default": "",
+    "hint": "建议填写；留空则不校验，只记录"
+  },
+  "auto_bootstrap": {
+    "description": "启动时自动下载并解压 rootfs",
+    "type": "bool",
+    "default": true
+  },
+  "bootstrap_packages": {
+    "description": "解压后额外安装的 apk 包",
+    "type": "list",
+    "default": [
+      "python3"
+    ],
+    "hint": "解压后用 apt/apk 装的包，默认 python3；需要宿主机联网"
+  },
+  "docker_image": {
+    "description": "docker 后端镜像",
+    "type": "string",
+    "default": "python:3.12-alpine"
+  },
+  "docker_user": {
+    "description": "docker 运行用户",
+    "type": "string",
+    "default": "",
+    "hint": "留空用镜像默认；可填 65534:65534"
+  },
+  "docker_reuse": {
+    "description": "复用沙盒容器",
+    "type": "bool",
+    "default": true,
+    "hint": "开启后每个沙盒常驻一个容器，命令走 docker exec，省掉每条命令建容器的开销"
+  },
+  "docker_idle_minutes": {
+    "description": "闲置容器回收（分钟）",
+    "type": "int",
+    "default": 30,
+    "hint": "多久没用到就 docker rm -f"
+  },
+  "sandbox_shell": {
+    "description": "沙盒内执行命令用的 shell",
+    "type": "string",
+    "default": "/bin/sh",
+    "hint": "Alpine 里没有 bash，别改成 /bin/bash"
+  },
+  "python_bin": {
+    "description": "沙盒内 python 可执行文件",
+    "type": "string",
+    "default": "python3"
+  },
+  "chroot_uid": {
+    "description": "chroot 后端降权到的 uid",
+    "type": "int",
+    "default": 65534
+  },
+  "chroot_gid": {
+    "description": "chroot 后端降权到的 gid",
+    "type": "int",
+    "default": 65534
+  },
+  "web_enabled": {
+    "description": "启用插件页面与接口",
+    "type": "bool",
+    "default": true,
+    "hint": "关掉后不注册任何 /api 接口，配置表单仍然可用"
+  },
+  "web_auth": {
+    "description": "WebUI 接口额外鉴权",
+    "type": "string",
+    "options": [
+      "dashboard",
+      "token",
+      "none"
+    ],
+    "default": "dashboard",
+    "hint": "dashboard=交给 AstrBot 控制台登录态（默认）；token=再要求一个 token；none=不检查（仅本机调试）"
+  },
+  "web_token": {
+    "description": "WebUI 访问 token",
+    "type": "string",
+    "default": "",
+    "hint": "web_auth=token 时必填；页面 URL 带一次 ?token=xxx 即可，之后存在浏览器里"
+  },
+  "web_writes_per_minute": {
+    "description": "WebUI 写操作限流（每分钟）",
+    "type": "int",
+    "default": 30,
+    "hint": "保存/删除/执行这类接口共用；0 表示不限"
+  },
+  "reply_max_chars": {
+    "description": "回消息的最大字符数",
+    "type": "int",
+    "default": 3000
+  },
+  "audit_enabled": {
+    "description": "写审计日志",
+    "type": "bool",
+    "default": true
+  },
+  "audit_max_bytes": {
+    "description": "审计日志轮转阈值（字节）",
+    "type": "int",
+    "default": 2097152
+  },
+  "audit_retention_days": {
+    "description": "审计日志保留天数",
+    "type": "int",
+    "default": 30,
+    "hint": "超过这个天数的 audit.jsonl 会被定时清理删掉"
+  },
+  "log_enabled": {
+    "description": "启用独立运行日志",
+    "type": "bool",
+    "default": true
+  },
+  "log_retention_days": {
+    "description": "日志保留天数",
+    "type": "int",
+    "default": 7
+  },
+  "log_max_files": {
+    "description": "日志文件数量上限",
+    "type": "int",
+    "default": 30
+  },
+  "log_max_bytes": {
+    "description": "单个日志文件大小上限（字节）",
+    "type": "int",
+    "default": 5242880,
+    "hint": "超过就切一个带时间戳的新文件"
+  },
+  "cleanup_interval_hours": {
+    "description": "清理间隔（小时）",
+    "type": "int",
+    "default": 12
+  },
+  "plugin_max_rss_mb": {
+    "description": "插件自检：进程 RSS 上限（MB）",
+    "type": "int",
+    "default": 0,
+    "hint": "超过就拒绝新任务；0 关闭。注意这是整个 AstrBot 进程的内存"
+  },
+  "plugin_max_threads": {
+    "description": "插件自检：进程线程数上限",
+    "type": "int",
+    "default": 0,
+    "hint": "超过就拒绝新任务；0 关闭"
+  },
+  "security_feed_url": {
+    "description": "外部漏洞源地址（可选）",
+    "type": "string",
+    "default": "",
+    "hint": "返回 JSON 数组：id / title / severity / affects(正则) / detail / fix。/sbx audit 用它匹配内核 CVE"
+  },
+  "security_feed_ttl": {
+    "description": "漏洞源缓存秒数",
+    "type": "int",
+    "default": 86400
+  },
+  "security_search_path": {
+    "description": "搜索插件路径（可选）",
+    "type": "string",
+    "default": "",
+    "hint": "指向 astrbot_plugin_search_engines 目录；留空自动在同级找。/sbx cve search 会用它抓链"
+  },
+  "security_search_engine": {
+    "description": "搜索用哪个引擎",
+    "type": "string",
+    "default": "bing",
+    "options": [
+      "bing",
+      "baidu",
+      "google"
+    ]
+  },
+  "security_feed_format": {
+    "description": "漏洞源格式",
+    "type": "string",
+    "default": "custom",
+    "options": [
+      "custom",
+      "nvd",
+      "kev"
+    ],
+    "hint": "custom=自定义 JSON 数组；nvd=services.nvd.nist.gov 2.0；kev=CISA 已知被利用目录"
+  },
+  "security_notify": {
+    "description": "定时巡检并私聊管理员",
+    "type": "bool",
+    "default": true
+  },
+  "security_scan_hours": {
+    "description": "巡检间隔（小时）",
+    "type": "int",
+    "default": 12
+  },
+  "ai_summary_enabled": {
+    "description": "用 AI 翻译并总结漏洞",
+    "type": "bool",
+    "default": false
+  },
+  "ai_summary_url": {
+    "description": "AI 接口地址（OpenAI 兼容）",
+    "type": "string",
+    "default": ""
+  },
+  "ai_summary_key": {
+    "description": "AI 接口密钥",
+    "type": "string",
+    "default": ""
+  },
+  "ai_summary_model": {
+    "description": "AI 模型名",
+    "type": "string",
+    "default": "gpt-4o-mini"
+  },
+  "ai_summary_source": {
+    "description": "用哪个模型做摘要",
+    "type": "string",
+    "default": "current",
+    "options": [
+      "current",
+      "custom"
+    ],
+    "hint": "current 直接用 AstrBot 当前对话模型，不用填 key"
+  },
+  "max_command_chars": {
+    "description": "单条命令长度上限",
+    "type": "int",
+    "default": 8192
+  },
+  "deny_patterns": {
+    "description": "禁止出现的命令片段",
+    "type": "list",
+    "default": []
+  },
+  "allow_root_sandbox": {
+    "description": "允许沙盒内以 root 运行",
+    "type": "bool",
+    "default": false
+  },
+  "allowed_platforms": {
+    "description": "允许使用沙盒的平台（留空=全部）",
+    "type": "list",
+    "default": [],
+    "hint": "填适配器名：aiocqhttp / telegram / lark / dingtalk 等，一行一个"
+  },
+  "export_as_file": {
+    "description": "导出时直接发文件（关掉则只回宿主路径）",
+    "type": "bool",
+    "default": true
+  }
+}
