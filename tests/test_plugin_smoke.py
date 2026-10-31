@@ -599,3 +599,19 @@ class TestExportMode(unittest.TestCase):
         self.assertEqual(kind, "plain")
         self.assertIn("/tmp/x.txt", text)
 
+class TestBootstrapMarkerPath(unittest.TestCase):
+    """last_bootstrap.json 必须写在 plugin_data 里，和读取方一致。
+
+    之前写在 AstrBot 的 data/ 根目录，webapi 却从 plugin_data 读，
+    结果这个文件永远读不到 —— 上架审核也是卡在这条。
+    """
+
+    def test_writer_uses_base_dir(self):
+        source = (Path(__file__).resolve().parent.parent / "main.py").read_text("utf-8")
+        self.assertIn('Path(self.base_dir) / "last_bootstrap.json"', source)
+        self.assertNotIn('Path(self.data_dir) / "last_bootstrap.json"', source)
+
+    def test_reader_uses_base_dir(self):
+        source = (Path(__file__).resolve().parent.parent / "sandboxkit" / "webapi.py").read_text("utf-8")
+        self.assertIn('Path(base_dir) / "last_bootstrap.json"', source)
+

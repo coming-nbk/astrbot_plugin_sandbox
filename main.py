@@ -573,7 +573,8 @@ class SandboxPlugin(Star):
             "reason": reason,
         }
         try:
-            path = Path(self.data_dir) / "last_bootstrap.json"
+            # 必须和 webapi 的读取方一致：都在 plugin_data 目录下
+            path = Path(self.base_dir) / "last_bootstrap.json"
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
         except OSError as exc:
